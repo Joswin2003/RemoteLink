@@ -1,0 +1,365 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>RemoteLink — Cross-Platform Remote Desktop</title>
+<meta name="description" content="RemoteLink: Connect Linux and Windows remotely. Free remote desktop app like AnyDesk."/>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet"/>
+<link rel="stylesheet" href="style.css"/>
+</head>
+<body>
+<!-- SIDEBAR -->
+<aside class="sidebar" id="sidebar">
+  <div class="logo">
+    <div class="logo-icon">
+      <svg width="28" height="28" viewBox="0 0 28 28" fill="none">
+        <rect x="2" y="2" width="10" height="10" rx="2" fill="url(#g1)"/>
+        <rect x="16" y="2" width="10" height="10" rx="2" fill="url(#g1)" opacity="0.7"/>
+        <rect x="2" y="16" width="10" height="10" rx="2" fill="url(#g1)" opacity="0.7"/>
+        <rect x="16" y="16" width="10" height="10" rx="2" fill="url(#g1)"/>
+        <line x1="12" y1="7" x2="16" y2="7" stroke="white" stroke-width="1.5"/>
+        <line x1="21" y1="12" x2="21" y2="16" stroke="white" stroke-width="1.5"/>
+        <line x1="12" y1="21" x2="16" y2="21" stroke="white" stroke-width="1.5"/>
+        <line x1="7" y1="12" x2="7" y2="16" stroke="white" stroke-width="1.5"/>
+        <defs>
+          <linearGradient id="g1" x1="0" y1="0" x2="1" y2="1">
+            <stop offset="0%" stop-color="#818cf8"/>
+            <stop offset="100%" stop-color="#6366f1"/>
+          </linearGradient>
+        </defs>
+      </svg>
+    </div>
+    <span class="logo-text">RemoteLink</span>
+  </div>
+
+  <nav class="nav">
+    <button class="nav-item active" id="nav-connect" onclick="showPanel('connect')">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><path d="M3 10a7 7 0 1014 0A7 7 0 003 10z" stroke="currentColor" stroke-width="1.5"/><path d="M10 6v4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Connect
+    </button>
+    <button class="nav-item" id="nav-sessions" onclick="showPanel('sessions')">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><rect x="2" y="4" width="16" height="12" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M6 8h8M6 12h5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Sessions
+    </button>
+    <button class="nav-item" id="nav-host" onclick="showPanel('host')">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="14" height="10" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 17h6M10 13v4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Host
+    </button>
+    <button class="nav-item" id="nav-transfer" onclick="showPanel('transfer')">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><path d="M4 10h12M10 4l6 6-6 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      Files
+    </button>
+    <button class="nav-item" id="nav-settings" onclick="showPanel('settings')">
+      <svg class="nav-icon" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="2.5" stroke="currentColor" stroke-width="1.5"/><path d="M10 3v2M10 15v2M3 10h2M15 10h2M5.05 5.05l1.41 1.41M13.54 13.54l1.41 1.41M5.05 14.95l1.41-1.41M13.54 6.46l1.41-1.41" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+      Settings
+    </button>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="local-id-card">
+      <div class="lid-label">Your ID</div>
+      <div class="lid-value" id="local-id">---</div>
+      <button class="copy-btn" id="copy-id-btn" onclick="copyLocalId()" title="Copy ID">
+        <svg viewBox="0 0 16 16" fill="none"><rect x="5" y="5" width="8" height="8" rx="1.5" stroke="currentColor" stroke-width="1.3"/><path d="M3 11V3h8" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+      </button>
+    </div>
+    <div class="status-bar">
+      <span class="status-dot" id="status-dot"></span>
+      <span class="status-text" id="status-text">Offline</span>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN CONTENT -->
+<main class="main" id="main">
+
+  <!-- CONNECT PANEL -->
+  <section class="panel active" id="panel-connect">
+    <div class="panel-header">
+      <h1>Connect to Remote</h1>
+      <p class="panel-subtitle">Enter the host's IP address or Session ID to connect</p>
+    </div>
+    <div class="connect-grid">
+      <!-- Direct IP Connect -->
+      <div class="card connect-card">
+        <div class="card-icon-wrap">
+          <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M12 3c0 0-4 3-4 9s4 9 4 9M12 3c0 0 4 3 4 9s-4 9-4 9M3 12h18" stroke="currentColor" stroke-width="1.5"/></svg>
+        </div>
+        <h2>Direct IP Connect</h2>
+        <p>Connect using IP address on same network</p>
+        <div class="input-group">
+          <label>Host IP Address</label>
+          <input type="text" id="host-ip" placeholder="e.g. 192.168.1.100" class="input-field"/>
+        </div>
+        <div class="input-group">
+          <label>Port</label>
+          <input type="number" id="host-port" value="8766" class="input-field"/>
+        </div>
+        <div class="input-group">
+          <label>Password (optional)</label>
+          <input type="password" id="host-password" placeholder="Leave empty if none" class="input-field"/>
+        </div>
+        <button class="btn-primary" id="connect-ip-btn" onclick="connectToHost()">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Connect Now
+        </button>
+      </div>
+
+      <!-- Session ID Connect -->
+      <div class="card connect-card">
+        <div class="card-icon-wrap accent2">
+          <svg viewBox="0 0 24 24" fill="none"><rect x="3" y="11" width="18" height="11" rx="2" stroke="currentColor" stroke-width="1.5"/><path d="M7 11V7a5 5 0 0110 0v4" stroke="currentColor" stroke-width="1.5"/><circle cx="12" cy="16" r="1.5" fill="currentColor"/></svg>
+        </div>
+        <h2>Session ID Connect</h2>
+        <p>Connect across networks using a relay session</p>
+        <div class="input-group">
+          <label>Session ID</label>
+          <input type="text" id="session-id-input" placeholder="e.g. 748-201-356" class="input-field session-input"/>
+        </div>
+        <div class="input-group">
+          <label>Relay Server</label>
+          <input type="text" id="relay-host" placeholder="relay.remotelink.local" class="input-field"/>
+        </div>
+        <div class="input-group">
+          <label>Password (optional)</label>
+          <input type="password" id="session-password" placeholder="Leave empty if none" class="input-field"/>
+        </div>
+        <button class="btn-secondary" id="connect-session-btn" onclick="connectBySession()">
+          <svg viewBox="0 0 16 16" fill="none"><path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          Connect via Relay
+        </button>
+      </div>
+
+      <!-- How it works -->
+      <div class="card info-card">
+        <h2>How to Connect</h2>
+        <ol class="steps">
+          <li><span class="step-num">1</span><span>Start RemoteLink on <strong>both</strong> computers</span></li>
+          <li><span class="step-num">2</span><span>On the host PC, go to <strong>Host</strong> tab and click <em>Start Hosting</em></span></li>
+          <li><span class="step-num">3</span><span>Share your <strong>IP address</strong> (same network) or <strong>Session ID</strong> (any network)</span></li>
+          <li><span class="step-num">4</span><span>Enter the details above and click <strong>Connect</strong></span></li>
+        </ol>
+        <div class="platform-badges">
+          <span class="badge linux">🐧 Linux</span>
+          <span class="badge windows">🪟 Windows</span>
+          <span class="badge">⟷ Bidirectional</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- HOST PANEL -->
+  <section class="panel" id="panel-host">
+    <div class="panel-header">
+      <h1>Host This Computer</h1>
+      <p class="panel-subtitle">Allow others to view and control this machine</p>
+    </div>
+    <div class="host-grid">
+      <div class="card host-card">
+        <div class="host-status-display" id="host-status-display">
+          <div class="pulse-ring" id="pulse-ring"></div>
+          <div class="host-icon">🖥️</div>
+          <div class="host-status-label" id="host-status-label">Not Hosting</div>
+        </div>
+        <div class="host-info-grid" id="host-info-grid">
+          <div class="host-info-item">
+            <span class="hii-label">Local IP</span>
+            <span class="hii-value" id="local-ip">Detecting...</span>
+          </div>
+          <div class="host-info-item">
+            <span class="hii-label">WS Port</span>
+            <span class="hii-value">8766</span>
+          </div>
+          <div class="host-info-item">
+            <span class="hii-label">Session ID</span>
+            <span class="hii-value" id="host-session-id">---</span>
+          </div>
+          <div class="host-info-item">
+            <span class="hii-label">Connected</span>
+            <span class="hii-value" id="host-connected-count">0 viewers</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Set Password (optional)</label>
+          <input type="password" id="host-set-password" placeholder="Leave empty for no password" class="input-field"/>
+        </div>
+        <div class="input-group">
+          <label>FPS (frames per second)</label>
+          <div class="slider-row">
+            <input type="range" id="host-fps" min="1" max="30" value="10" class="slider"/>
+            <span class="slider-val" id="fps-val">10</span>
+          </div>
+        </div>
+        <div class="input-group">
+          <label>Image Quality</label>
+          <div class="slider-row">
+            <input type="range" id="host-quality" min="10" max="90" value="40" class="slider"/>
+            <span class="slider-val" id="quality-val">40</span>
+          </div>
+        </div>
+        <div class="host-btn-row">
+          <button class="btn-primary" id="start-host-btn" onclick="startHosting()">▶ Start Hosting</button>
+          <button class="btn-danger hidden" id="stop-host-btn" onclick="stopHosting()">⬛ Stop</button>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Connected Viewers</h2>
+        <div id="viewer-list" class="viewer-list">
+          <div class="empty-state">No viewers connected</div>
+        </div>
+        <div class="host-perms">
+          <h3>Permissions</h3>
+          <label class="toggle-row">
+            <span>Allow mouse control</span>
+            <div class="toggle" id="perm-mouse"><div class="toggle-thumb"></div></div>
+          </label>
+          <label class="toggle-row">
+            <span>Allow keyboard control</span>
+            <div class="toggle" id="perm-keyboard"><div class="toggle-thumb"></div></div>
+          </label>
+          <label class="toggle-row">
+            <span>Allow file transfer</span>
+            <div class="toggle" id="perm-files"><div class="toggle-thumb"></div></div>
+          </label>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SESSIONS PANEL -->
+  <section class="panel" id="panel-sessions">
+    <div class="panel-header">
+      <h1>Active Sessions</h1>
+      <p class="panel-subtitle">Manage your remote desktop sessions</p>
+    </div>
+    <div id="sessions-container" class="sessions-container">
+      <div class="empty-state-large">
+        <div class="esi">🖥️</div>
+        <h3>No Active Sessions</h3>
+        <p>Connect to a remote computer to start a session</p>
+        <button class="btn-primary" onclick="showPanel('connect')">Connect Now</button>
+      </div>
+    </div>
+  </section>
+
+  <!-- FILE TRANSFER PANEL -->
+  <section class="panel" id="panel-transfer">
+    <div class="panel-header">
+      <h1>File Transfer</h1>
+      <p class="panel-subtitle">Send and receive files between connected machines</p>
+    </div>
+    <div class="transfer-grid">
+      <div class="card">
+        <h2>Send Files</h2>
+        <div class="drop-zone" id="drop-zone" ondragover="event.preventDefault()" ondrop="handleFileDrop(event)">
+          <div class="dz-icon">📁</div>
+          <p>Drag & drop files here</p>
+          <p class="dz-sub">or</p>
+          <button class="btn-secondary" onclick="document.getElementById('file-input').click()">Browse Files</button>
+          <input type="file" id="file-input" multiple class="hidden" onchange="handleFileSelect(event)"/>
+        </div>
+        <div id="transfer-queue" class="transfer-queue"></div>
+      </div>
+      <div class="card">
+        <h2>Received Files</h2>
+        <div id="received-files" class="received-files">
+          <div class="empty-state">No files received yet</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- SETTINGS PANEL -->
+  <section class="panel" id="panel-settings">
+    <div class="panel-header">
+      <h1>Settings</h1>
+      <p class="panel-subtitle">Configure RemoteLink preferences</p>
+    </div>
+    <div class="settings-grid">
+      <div class="card">
+        <h2>Connection</h2>
+        <div class="setting-item">
+          <div class="si-info"><span class="si-label">Default WS Port</span><span class="si-desc">WebSocket port for hosting</span></div>
+          <input type="number" value="8766" class="input-field short-input" id="s-port"/>
+        </div>
+        <div class="setting-item">
+          <div class="si-info"><span class="si-label">Connection Timeout</span><span class="si-desc">Seconds before timeout</span></div>
+          <input type="number" value="10" class="input-field short-input" id="s-timeout"/>
+        </div>
+      </div>
+      <div class="card">
+        <h2>Display</h2>
+        <div class="setting-item">
+          <div class="si-info"><span class="si-label">Default FPS</span><span class="si-desc">Frames per second for streaming</span></div>
+          <input type="number" value="10" min="1" max="30" class="input-field short-input" id="s-fps"/>
+        </div>
+        <div class="setting-item">
+          <div class="si-info"><span class="si-label">Default Quality</span><span class="si-desc">JPEG quality 1-100</span></div>
+          <input type="number" value="40" min="10" max="90" class="input-field short-input" id="s-quality"/>
+        </div>
+        <div class="setting-item">
+          <div class="si-info"><span class="si-label">Scale to Fit</span><span class="si-desc">Scale remote screen to window</span></div>
+          <div class="toggle active" id="s-scale" onclick="toggleSetting(this)"><div class="toggle-thumb"></div></div>
+        </div>
+      </div>
+      <div class="card">
+        <h2>About RemoteLink</h2>
+        <div class="about-info">
+          <div class="about-logo">🔗</div>
+          <h3>RemoteLink v1.0</h3>
+          <p>Cross-platform remote desktop</p>
+          <p>Works on Linux &amp; Windows</p>
+          <div class="about-badges">
+            <span class="badge">Open Source</span>
+            <span class="badge">No Registration</span>
+            <span class="badge">Encrypted</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- REMOTE VIEWER OVERLAY -->
+  <div class="viewer-overlay hidden" id="viewer-overlay">
+    <div class="viewer-topbar">
+      <div class="viewer-info">
+        <div class="vconn-dot" id="vconn-dot"></div>
+        <span id="viewer-host-name">Remote Host</span>
+        <span class="viewer-latency" id="viewer-latency">-- ms</span>
+      </div>
+      <div class="viewer-controls">
+        <button class="vbtn" id="vbtn-ctrl" onclick="toggleControl()" title="Toggle Control">🖱️ Control</button>
+        <button class="vbtn" id="vbtn-fullscreen" onclick="toggleFullscreen()" title="Fullscreen">⛶</button>
+        <button class="vbtn" id="vbtn-chat" onclick="toggleChat()" title="Chat">💬</button>
+        <button class="vbtn" id="vbtn-quality" onclick="cycleQuality()" title="Quality">📊 Quality</button>
+        <button class="vbtn danger" onclick="disconnectSession()" title="Disconnect">✖ Disconnect</button>
+      </div>
+    </div>
+    <div class="viewer-body">
+      <canvas id="remote-canvas"></canvas>
+      <div class="viewer-stats" id="viewer-stats">
+        <span id="stat-fps">0 FPS</span>
+        <span id="stat-size">0 KB</span>
+      </div>
+    </div>
+    <!-- Chat sidebar -->
+    <div class="chat-sidebar hidden" id="chat-sidebar">
+      <div class="chat-header">Chat</div>
+      <div class="chat-messages" id="chat-messages"></div>
+      <div class="chat-input-row">
+        <input type="text" id="chat-input" placeholder="Type message..." class="input-field" onkeydown="if(event.key==='Enter')sendChat()"/>
+        <button class="btn-primary small" onclick="sendChat()">Send</button>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<!-- Toast notifications -->
+<div class="toast-container" id="toast-container"></div>
+
+<script src="app.js"></script>
+</body>
+</html>
